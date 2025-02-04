@@ -39,7 +39,7 @@ public:
     }
 
     void step() {
-        Symbol currentSymbol = tape.count(head) ? tape[head] : blankSymbol; // Read from tape or use blank
+        Symbol currentSymbol = tape.count(head) ? tape[head] : blankSymbol;
         auto key = make_pair(state, currentSymbol);
 
         if (deltas.find(key) == deltas.end()) {
