@@ -1,7 +1,3 @@
-//
-// Created by berlitzeop on 2/4/25.
-//
-
 #ifndef TURINGMACHINEPP_HPP
 #define TURINGMACHINEPP_HPP
 #include <map>
