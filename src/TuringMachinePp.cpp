@@ -13,8 +13,9 @@ class TuringMachinePp
 public:
     using State = string;
     using Symbol = char;
-    using Position = vector<int>;
-    using Transition = tuple<State, Symbol, vector<int>>;
+    using Position = map<int, int>; //dimensions, position
+    using Movement = map<int, int>;
+    using Transition = tuple<State, Symbol, Movement>;
 
 private:
     map<pair<State, Symbol>, Transition> deltas;
@@ -22,16 +23,15 @@ private:
     Position head;
     State state;
     int dimensions;
-    Symbol blankSymbol = '0';
+    Symbol blankSymbol = '_';
 
 public:
     TuringMachinePp(const int dims, State startState) : state(std::move(startState)), dimensions(dims)
     {
-        head = vector(dims, 0);
         tape[head] = blankSymbol;
     }
 
-    void addTransition(const State& currState, Symbol readSym, const State& newState, Symbol writeSym, const vector<int>& movement) {
+    void addTransition(const State& currState, Symbol readSym, const State& newState, Symbol writeSym, const Movement& movement) {
         deltas[{currState, readSym}] = make_tuple(newState, writeSym, movement);
     }
 
@@ -46,11 +46,20 @@ public:
         }
 
         auto [newState, writeSym, movement] = deltas[key];
-        tape[head] = writeSym;
+        if (writeSym == blankSymbol) {
+            tape.erase(head);
+        } else {
+            tape[head] = writeSym;
+        }
+
         state = newState;
 
         for (int i = 0; i < dimensions; i++) {
-            head[i] += movement[i];
+            if (const int newVal = head[i] + movement[i]; newVal == 0) {
+                head.erase(i);
+            } else {
+                head[i] = newVal;
+            }
         }
 
         if (!tape.contains(head)) {
@@ -67,19 +76,36 @@ public:
         }
     }
 
+    static void printPosition(const Position& pos) {
+        cout << "{ ";
+        for (const auto& [dim, val] : pos) {
+            cout << dim << ":" << val << " ";
+        }
+        cout << "}";
+    }
+
     void printTape() {
-        cout << "State: " << state << ", Head Position: [";
-        for (const int i : head) cout << i << " ";
-        cout << "], Symbol under head: '" << tape[head] << "'\n";
+        cout << "State: " << state << ", Head Position: ";
+        printPosition(head);
+        cout << ", Symbol under head: '" << tape[head] << "'\n";
+
+        cout << "Tape contents:\n";
+        for (const auto& [pos, sym] : tape) {
+            printPosition(pos);
+            cout << " -> '" << sym << "'";
+            if (pos == head) cout << " <- head";
+            cout << "\n";
+        }
+        cout << endl;
     }
 };
 
 int main()
 {
-    TuringMachinePp tm(3, "q0");
+    TuringMachinePp tm(10, "q0");
 
-    tm.addTransition("q0", '0', "q2", '1', {1, 0});
-    tm.addTransition("q1", '0', "q0", '0', {-1, 0});
+    tm.addTransition("q0", '_', "q1", '_', {{1, 1}, {9, -1}}); //Movement is Dimension : movement
+    tm.addTransition("q1", '_', "q2", 'a', {{1, -1}});
 
     tm.run();
 
