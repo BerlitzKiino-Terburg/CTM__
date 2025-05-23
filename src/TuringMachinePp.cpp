@@ -25,7 +25,7 @@ private:
     Symbol blankSymbol = '0';
 
 public:
-    TuringMachinePp(const int dims, State startState) : dimensions(dims), state(std::move(startState))
+    TuringMachinePp(const int dims, State startState) : state(std::move(startState)), dimensions(dims)
     {
         head = vector(dims, 0);
         tape[head] = blankSymbol;
@@ -76,9 +76,9 @@ public:
 
 int main()
 {
-    TuringMachinePp tm(2, "q0");
+    TuringMachinePp tm(3, "q0");
 
-    tm.addTransition("q0", '0', "q1", '1', {1, 0});
+    tm.addTransition("q0", '0', "q2", '1', {1, 0});
     tm.addTransition("q1", '0', "q0", '0', {-1, 0});
 
     tm.run();
